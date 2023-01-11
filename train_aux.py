@@ -34,6 +34,7 @@ from utils.loss import ComputeLoss, ComputeLossAuxOTA
 from utils.plots import plot_images, plot_labels, plot_results, plot_evolution
 from utils.torch_utils import ModelEMA, select_device, intersect_dicts, torch_distributed_zero_first, is_parallel
 from utils.wandb_logging.wandb_utils import WandbLogger, check_wandb_resume
+import wandb
 
 logger = logging.getLogger(__name__)
 
@@ -423,6 +424,7 @@ def train(hyp, opt, device, tb_writer=None):
                                                  is_coco=is_coco,
                                                  v5_metric=opt.v5_metric)
 
+                wandb.log({'val_AP_50_95_all_100': results[3], 'val_AP_50_all_100': results[2]}, step=epoch)
             # Write
             with open(results_file, 'a') as f:
                 f.write(s + '%10.4g' * 7 % results + '\n')  # append metrics, val_loss
@@ -558,6 +560,9 @@ if __name__ == '__main__':
     parser.add_argument('--save_period', type=int, default=-1, help='Log model after every "save_period" epoch')
     parser.add_argument('--artifact_alias', type=str, default="latest", help='version of dataset artifact to be used')
     parser.add_argument('--v5-metric', action='store_true', help='assume maximum recall as 1.0 in AP calculation')
+
+    parser.add_argument('--wandb_run_name', type=str)
+    parser.add_argument('--wandb_project_name', type=str)
     opt = parser.parse_args()
 
     # Set DDP variables
@@ -570,6 +575,8 @@ if __name__ == '__main__':
 
     # Resume
     wandb_run = check_wandb_resume(opt)
+    wandb.init(name=opt.wandb_run_name, project=opt.wandb_project_name)
+
     if opt.resume and not wandb_run:  # resume an interrupted run
         ckpt = opt.resume if isinstance(opt.resume, str) else get_latest_run()  # specified or most recent path
         assert os.path.isfile(ckpt), 'ERROR: --resume checkpoint does not exist'
