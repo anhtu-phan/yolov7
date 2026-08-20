@@ -1,3 +1,18 @@
+## Fork note — what I changed
+
+This is my working fork of **[WongKinYiu/yolov7](https://github.com/WongKinYiu/yolov7)**, used for object-detection experiments in 2022–2023 on a shared university GPU cluster. The model and the original code are the upstream authors'; **everything below the horizontal rule is their README, unchanged.**
+
+What I added on top:
+
+- **`--num_classes` as a command-line argument** (`train.py`, `utils/loss.py`), so a released checkpoint could be retargeted onto a different label set.
+- **Per-epoch validation metrics logged to Weights & Biases** from `train_aux.py` — `val_AP_50_95_all_100` and `val_AP_50_all_100` at each epoch, so runs on the auxiliary-head trainer could be compared against the main one in the same dashboard.
+
+This fork is a lighter touch than my DETR-family forks; the container and Slurm scripts live in those.
+
+Trace any of it with `git log --author=anhtu95`.
+
+---
+
 # Official YOLOv7
 
 Implementation of paper - [YOLOv7: Trainable bag-of-freebies sets new state-of-the-art for real-time object detectors](https://arxiv.org/abs/2207.02696)
